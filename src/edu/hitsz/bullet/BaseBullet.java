@@ -1,7 +1,7 @@
 package edu.hitsz.bullet;
 
-import edu.hitsz.application.Game;
-import edu.hitsz.basic.FlyingObject;
+import edu.hitsz.application.Main;
+import edu.hitsz.basic.AbstractFlyingObject;
 
 /**
  * 子弹类。
@@ -9,10 +9,11 @@ import edu.hitsz.basic.FlyingObject;
  *
  * @author hitsz
  */
-public class Bullet extends FlyingObject {
-    public final int power;
+public abstract class BaseBullet extends AbstractFlyingObject {
 
-    public Bullet(int locationX, int locationY, int speedX, int speedY, int power) {
+    private int power = 10;
+
+    public BaseBullet(int locationX, int locationY, int speedX, int speedY, int power) {
         super(locationX, locationY, speedX, speedY);
         this.power = power;
     }
@@ -22,18 +23,21 @@ public class Bullet extends FlyingObject {
         super.forward();
 
         // 判定 x 轴出界
-        if (locationX <= 0 || locationX >= Game.WINDOW_WIDTH) {
+        if (locationX <= 0 || locationX >= Main.WINDOW_WIDTH) {
             vanish();
         }
 
         // 判定 y 轴出界
-        if (speedY > 0 && locationY >= Game.WINDOW_HEIGHT ) {
+        if (speedY > 0 && locationY >= Main.WINDOW_HEIGHT ) {
             // 向下飞行出界
             vanish();
         }else if (locationY <= 0){
             // 向上飞行出界
             vanish();
         }
+    }
 
+    public int getPower() {
+        return power;
     }
 }

@@ -21,12 +21,28 @@ public class HeroController {
         this.heroAircraft = heroAircraft;
 
         mouseAdapter = new MouseAdapter() {
-            @Override
+            /*@Override
             public void mouseDragged(MouseEvent e) {
                 super.mouseDragged(e);
                 int x = e.getX();
                 int y = e.getY();
-                if ( x<0 || x>Game.WINDOW_WIDTH || y<0 || y>Game.WINDOW_HEIGHT){
+                if ( x<0 || x>Main.WINDOW_WIDTH || y<0 || y>Main.WINDOW_HEIGHT){
+                    // 防止超出边界
+                    return;
+                }
+                heroAircraft.setLocation(x, y);
+            }*/
+
+            /**
+             * 将点击拖拽修改成了跟随鼠标移动
+             * @param e
+             */
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                super.mouseMoved(e);
+                int x = e.getX();
+                int y = e.getY();
+                if ( x<0 || x>Main.WINDOW_WIDTH || y<0 || y>Main.WINDOW_HEIGHT){
                     // 防止超出边界
                     return;
                 }
