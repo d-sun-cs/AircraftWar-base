@@ -164,6 +164,7 @@ public class Game extends JPanel {
 
     private void shootAction() {
         // TODO 敌机射击
+        //普通敌机射出的子弹数目为0，不影响结果
         List<BaseBullet> enemyBullets0 = enemyAircrafts.stream()
                 .flatMap(abstractAircraft -> abstractAircraft.shoot().stream())
                 .collect(Collectors.toList());

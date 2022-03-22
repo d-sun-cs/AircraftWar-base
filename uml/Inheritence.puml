@@ -34,7 +34,7 @@ abstract class AbstractAircraft
     + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
     + decreaseHp(int decrease):void
     + getHp():int
-    + {abstract} shoot():List<Bullet>
+    + {abstract} shoot():List<BaseBullet>
  }
 
 abstract class BaseBullet
@@ -79,7 +79,7 @@ class HeroAircraft {
     - HeroAircraft singleton
     - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
-    + shoot():List<Bullet>
+    + shoot():List<BaseBullet>
     + getInstance():HeroAircraft
     + increaseHp(int increase):void
 }
@@ -87,7 +87,7 @@ class HeroAircraft {
 class MobEnemy {
     + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
-    + shoot():List<Bullet>
+    + shoot():List<BaseBullet>
 }
 
 class EliteEnemy

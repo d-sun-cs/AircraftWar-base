@@ -47,6 +47,11 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
      */
     public abstract List<BaseBullet> shoot();
 
+    /**
+     * 观察者模式中的更新方法（之后实验再实现）
+     */
+    //public abstract void update();
+
 }
 
 
