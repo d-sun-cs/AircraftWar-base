@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Game {
+    - heroAircraft: HeroAircraft
+}
+
+class HeroAircraft {
+    - {static} singleton: HeroAircraft
+    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + {static} getInstance(): HeroAircraft
+}
+
+
+HeroAircraft <-- Game
+HeroAircraft <-- HeroAircraft
+
+
+@enduml

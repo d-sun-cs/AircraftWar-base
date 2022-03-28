@@ -9,7 +9,7 @@ import edu.hitsz.basic.AbstractFlyingObject;
  *
  * @author hitsz
  */
-public abstract class BaseBullet extends AbstractFlyingObject {
+public class BaseBullet extends AbstractFlyingObject {
 
     private int power = 10;
 

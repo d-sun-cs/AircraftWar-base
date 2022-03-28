@@ -37,7 +37,7 @@ abstract class AbstractAircraft
     + {abstract} shoot():List<BaseBullet>
  }
 
-abstract class BaseBullet
+class BaseBullet
 {
     - int power
 

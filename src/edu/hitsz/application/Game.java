@@ -1,8 +1,13 @@
 package edu.hitsz.application;
 
-import edu.hitsz.aircraft.*;
-import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.aircraft.AbstractAircraft;
+import edu.hitsz.aircraft.EliteEnemy;
+import edu.hitsz.aircraft.HeroAircraft;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.factory.EnemyFactory;
+import edu.hitsz.factory.PropFactory;
+import edu.hitsz.factory.impl.*;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.prop.BloodProp;
 import edu.hitsz.prop.BombProp;
@@ -11,9 +16,12 @@ import edu.hitsz.prop.BulletProp;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -35,11 +43,24 @@ public class Game extends JPanel {
      */
     private int timeInterval = 40;
 
+    /**
+     * 飞机、道具、子弹实体类
+     */
     private final HeroAircraft heroAircraft;
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
     private final List<AbstractProp> props;
+
+    /**
+     * 敌机和道具的工厂
+     */
+    private final EnemyFactory mobEnemyFactory;
+    private final EnemyFactory eliteEnemyFactory;
+    private final EnemyFactory bossEnemyFactory;
+    private final PropFactory bloodPropFactory;
+    private final PropFactory bombPropFactory;
+    private final PropFactory bulletPropFactory;
 
     private int enemyMaxNumber = 5;
 
@@ -55,13 +76,19 @@ public class Game extends JPanel {
 
 
     public Game() {
+        //初始化飞机、子弹、道具实体类(集合)
         heroAircraft = HeroAircraft.getInstance();
-
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
-        //TODO 初始化道具集合
         props = new LinkedList<>();
+        //初始化敌机和道具工厂
+        mobEnemyFactory = new MobEnemyFactory();
+        eliteEnemyFactory = new EliteEnemyFactory();
+        bossEnemyFactory = new BossEnemyFactory();
+        bloodPropFactory = new BloodPropFactory();
+        bombPropFactory = new BombPropFactory();
+        bulletPropFactory = new BulletPropFactory();
 
         //Scheduled 线程池，用于定时任务调度
         executorService = new ScheduledThreadPoolExecutor(1);
@@ -133,18 +160,13 @@ public class Game extends JPanel {
 
     /**
      * 以一定概率产生普通敌机或精英敌机
-     * (之后会将这个方法转交给工厂)
+     *
      * @return 产生的敌机
      */
     private AbstractAircraft produceEnemy() {
-        int locationX = (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth()) + ImageManager.MOB_ENEMY_IMAGE.getWidth() / 2) * 1;
-        int locationY = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.2) * 1;
-        int speedX = 0;
-        int speedY = 10;
-        int hp = 30;
         if (System.currentTimeMillis() % 3 == 0)//三分之一的概率产生精英敌机
-            return new EliteEnemy(locationX, locationY, speedX, speedY, hp * 2);
-        else return  new MobEnemy(locationX, locationY, speedX, speedY, hp);
+            return eliteEnemyFactory.createEnemy();
+        else return mobEnemyFactory.createEnemy();
     }
 
     //***********************
@@ -235,7 +257,7 @@ public class Game extends JPanel {
                     // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
-                    //如果英雄子弹消灭了精英敌机
+                    //如果英雄子弹消灭了敌机
                     if (enemyAircraft.notValid()) {
                         // TODO 获得分数，一定概率在同一位置产生道具补给
                         score += 10;
@@ -271,7 +293,7 @@ public class Game extends JPanel {
                     heroAircraft.increaseHp(30);
                 } else if (prop instanceof BombProp) {
                     System.out.println("FireSupply active!");
-                } else {
+                } else if (prop instanceof BulletProp){
                     System.out.println("BombSupply active!");
                 }
                 prop.vanish();
@@ -282,23 +304,21 @@ public class Game extends JPanel {
 
     /**
      * 以一定概率产生道具
-     * (之后会将这个方法转交给工厂)
      * @param locationX 要产生道具的X坐标
      * @param locationY 要产生道具的Y坐标
      * @return 产生的道具（null代表不掉落道具）
      */
     private AbstractProp produceProp(int locationX, int locationY) {
-        int speedX = 0;
-        int speedY = 1;
+
         long rand = System.currentTimeMillis();
         //随机产生三种道具之一
         //一半的概率产生道具（现在设置太低了不好测试）
         if (rand % 6 == 1) {
-            return new BloodProp(locationX, locationY, speedX, speedY);
+            return bloodPropFactory.createProp(locationX, locationY);
         } else if (rand % 6 == 2) {
-            return new BombProp(locationX, locationY, speedX, speedY);
-        } else if (rand % 6 == 3){
-            return new BulletProp(locationX, locationY, speedX, speedY);
+            return bombPropFactory.createProp(locationX, locationY);
+        } else if (rand % 6 == 3) {
+            return bulletPropFactory.createProp(locationX, locationY);
         } else return null; //返回null代表没掉落道具
     }
 
