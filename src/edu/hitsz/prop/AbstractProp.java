@@ -3,7 +3,15 @@ package edu.hitsz.prop;
 import edu.hitsz.application.Main;
 import edu.hitsz.basic.AbstractFlyingObject;
 
+/**
+ * @author SunDocker
+ */
 public abstract class AbstractProp extends AbstractFlyingObject {
+    /**
+     * 产生道具的概率为：3 / PROBABILITY
+     */
+    public static final int PROBABILITY = 6;
+
     //观察者集合（后面实验再用）
     //protected List<FlyingObject> observers;
 

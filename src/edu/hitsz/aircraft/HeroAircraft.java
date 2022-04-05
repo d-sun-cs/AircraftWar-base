@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class HeroAircraft extends AbstractAircraft {
     /**
-     * 单例
+     * 单例T
      */
     private static HeroAircraft singleton;
 

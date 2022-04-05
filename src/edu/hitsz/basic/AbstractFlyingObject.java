@@ -77,7 +77,7 @@ public abstract class AbstractFlyingObject {
     public void forward() {
         locationX += speedX;
         locationY += speedY;
-        if (locationX <= 0 || locationX >= Main.WINDOW_WIDTH) {
+        if (locationX < this.getWidth() / 2 || locationX > Main.WINDOW_WIDTH - this.getWidth() / 2) {
             // 横向超出边界后反向
             speedX = -speedX;
         }

@@ -19,9 +19,7 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -91,7 +89,7 @@ public class Game extends JPanel {
         bulletPropFactory = new BulletPropFactory();
 
         //Scheduled 线程池，用于定时任务调度
-        executorService = new ScheduledThreadPoolExecutor(1);
+        executorService = new ScheduledThreadPoolExecutor(1, (ThreadFactory) Thread::new);
 
         //启动英雄机鼠标监听
         new HeroController(this, heroAircraft);
@@ -164,9 +162,12 @@ public class Game extends JPanel {
      * @return 产生的敌机
      */
     private AbstractAircraft produceEnemy() {
-        if (System.currentTimeMillis() % 3 == 0)//三分之一的概率产生精英敌机
+        //三分之一的概率产生精英敌机
+        if (System.currentTimeMillis() % EliteEnemy.PROBABILITY == 0) {
             return eliteEnemyFactory.createEnemy();
-        else return mobEnemyFactory.createEnemy();
+        } else {
+            return mobEnemyFactory.createEnemy();
+        }
     }
 
     //***********************
@@ -266,7 +267,8 @@ public class Game extends JPanel {
                             int locationX = enemyAircraft.getLocationX();
                             int locationY = enemyAircraft.getLocationY();
                             AbstractProp abstractProp = produceProp(locationX, locationY);
-                            if (!Objects.isNull(abstractProp)) {//如果返回null代表没掉落道具
+                            //如果返回null代表没掉落道具
+                            if (!Objects.isNull(abstractProp)) {
                                 props.add(abstractProp);
                             }
                         }
@@ -287,13 +289,12 @@ public class Game extends JPanel {
             }
             if (heroAircraft.crash(prop)) {
                 // 英雄机碰到道具、产生道具效果
-                //注：之后要改成观察者模式
-                // prop.notifyObservers();
+                //注：之后要改成观察者模式，使用prop.notifyObservers();
                 if (prop instanceof BloodProp) {
                     heroAircraft.increaseHp(30);
                 } else if (prop instanceof BombProp) {
                     System.out.println("FireSupply active!");
-                } else if (prop instanceof BulletProp){
+                } else if (prop instanceof BulletProp) {
                     System.out.println("BombSupply active!");
                 }
                 prop.vanish();
@@ -304,6 +305,7 @@ public class Game extends JPanel {
 
     /**
      * 以一定概率产生道具
+     *
      * @param locationX 要产生道具的X坐标
      * @param locationY 要产生道具的Y坐标
      * @return 产生的道具（null代表不掉落道具）
@@ -313,13 +315,16 @@ public class Game extends JPanel {
         long rand = System.currentTimeMillis();
         //随机产生三种道具之一
         //一半的概率产生道具（现在设置太低了不好测试）
-        if (rand % 6 == 1) {
+        if (rand % AbstractProp.PROBABILITY == BloodProp.CHOICE) {
             return bloodPropFactory.createProp(locationX, locationY);
-        } else if (rand % 6 == 2) {
+        } else if (rand % AbstractProp.PROBABILITY == BombProp.CHOICE) {
             return bombPropFactory.createProp(locationX, locationY);
-        } else if (rand % 6 == 3) {
+        } else if (rand % AbstractProp.PROBABILITY == BulletProp.CHOICE) {
             return bulletPropFactory.createProp(locationX, locationY);
-        } else return null; //返回null代表没掉落道具
+        } else {
+            //返回null代表没掉落道具
+            return null;
+        }
     }
 
     /**

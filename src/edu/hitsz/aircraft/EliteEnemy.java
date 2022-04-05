@@ -6,13 +6,26 @@ import edu.hitsz.bullet.EnemyBullet;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author SunDocker
+ */
 public class EliteEnemy extends MobEnemy {
     /**
-     * 攻击方式
+     * 精英敌机产生概率的倒数
      */
-    private int shootNum = 1;     //子弹一次发射数量
-    private int power = 30;       //子弹伤害
-    private int direction = 1;  //子弹射击方向 (向上发射：1，向下发射：-1)
+    public static final int PROBABILITY = 3;
+    /**
+     * 攻击方式——子弹一次发射数量
+     */
+    private int shootNum = 1;
+    /**
+     * 攻击方式——子弹伤害
+     */
+    private int power = 30;
+    /**
+     * 攻击方式——子弹射击方向 (向上发射：1，向下发射：-1)
+     */
+    private int direction = 1;
 
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
