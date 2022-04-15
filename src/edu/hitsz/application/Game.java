@@ -5,6 +5,9 @@ import edu.hitsz.aircraft.EliteEnemy;
 import edu.hitsz.aircraft.HeroAircraft;
 import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.dao.UserDao;
+import edu.hitsz.dao.impl.UserDaoImpl;
+import edu.hitsz.dao.pojo.User;
 import edu.hitsz.factory.EnemyFactory;
 import edu.hitsz.factory.PropFactory;
 import edu.hitsz.factory.impl.*;
@@ -12,13 +15,16 @@ import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.prop.BloodProp;
 import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.BulletProp;
+import edu.hitsz.strategy.ScatteringShootStrategy;
+import edu.hitsz.strategy.StraightShootStrategy;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
+import java.util.Timer;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +52,7 @@ public class Game extends JPanel {
      */
     private final HeroAircraft heroAircraft;
     private final List<AbstractAircraft> enemyAircrafts;
+    private AbstractAircraft boss;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
     private final List<AbstractProp> props;
@@ -56,14 +63,12 @@ public class Game extends JPanel {
     private final EnemyFactory mobEnemyFactory;
     private final EnemyFactory eliteEnemyFactory;
     private final EnemyFactory bossEnemyFactory;
-    private final PropFactory bloodPropFactory;
-    private final PropFactory bombPropFactory;
-    private final PropFactory bulletPropFactory;
 
     private int enemyMaxNumber = 5;
 
     private boolean gameOverFlag = false;
     private int score = 0;
+    private int step = 100;
     private int time = 0;
     /**
      * 周期（ms)
@@ -72,6 +77,16 @@ public class Game extends JPanel {
     private int cycleDuration = 600;
     private int cycleTime = 0;
 
+    /**
+     * dao
+     */
+    UserDao userDao = new UserDaoImpl();
+
+    /**
+     * 射击相关，暂时写在Game中，之后使用观察者模式会放在道具中
+     */
+    private boolean isScattering = false;
+    private Thread lastThread;
 
     public Game() {
         //初始化飞机、子弹、道具实体类(集合)
@@ -84,9 +99,6 @@ public class Game extends JPanel {
         mobEnemyFactory = new MobEnemyFactory();
         eliteEnemyFactory = new EliteEnemyFactory();
         bossEnemyFactory = new BossEnemyFactory();
-        bloodPropFactory = new BloodPropFactory();
-        bombPropFactory = new BombPropFactory();
-        bulletPropFactory = new BulletPropFactory();
 
         //Scheduled 线程池，用于定时任务调度
         executorService = new ScheduledThreadPoolExecutor(1, (ThreadFactory) Thread::new);
@@ -132,6 +144,8 @@ public class Game extends JPanel {
             // 撞击检测
             crashCheckAction();
 
+            scoreCheck();
+
             // 后处理
             postProcessAction();
 
@@ -143,6 +157,24 @@ public class Game extends JPanel {
                 // 游戏结束
                 executorService.shutdown();
                 gameOverFlag = true;
+                User user = new User();
+                user.setCreateTime(System.currentTimeMillis());
+                user.setScore(score);
+                user.setName("testUserName");
+                user.setDifficulty(0);
+                userDao.saveUser(user);
+                List<User> userList = userDao.selectUsersOrderByScoreDesc();
+                System.out.println("**************************************************");
+                System.out.println("********************得分排行榜*********************");
+                System.out.println("**************************************************");
+                for (int i = 0; i < userList.size(); i++) {
+                    User usr = userList.get(i);
+                    System.out.printf("第%d名：" + usr.getName() + ", %d, "
+                            , i + 1, usr.getScore());
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+                    String timeStr = sdf.format(new Date(usr.getCreateTime()));
+                    System.out.println(timeStr);
+                }
                 System.out.println("Game Over!");
             }
 
@@ -192,6 +224,9 @@ public class Game extends JPanel {
                 .flatMap(abstractAircraft -> abstractAircraft.shoot().stream())
                 .collect(Collectors.toList());
         enemyBullets.addAll(enemyBullets0);
+        if (Objects.nonNull(boss)) {
+            enemyBullets.addAll(boss.shoot());
+        }
 
         // 英雄射击
         heroBullets.addAll(heroAircraft.shoot());
@@ -222,6 +257,18 @@ public class Game extends JPanel {
     }
 
 
+    private void scoreCheck() {
+        if (score >= step) {
+            //没有boss则产生boss，已经有boss则销毁并产生新boss
+            if (Objects.nonNull(boss)) {
+                boss.vanish();
+                System.out.println("boss刷新");
+            }
+            boss = bossEnemyFactory.createEnemy();
+            step += 100;
+        }
+    }
+
     /**
      * 碰撞检测：
      * 1. 敌机攻击英雄
@@ -247,6 +294,7 @@ public class Game extends JPanel {
             if (bullet.notValid()) {
                 continue;
             }
+            //对普通敌机和精英敌机的检测
             for (AbstractAircraft enemyAircraft : enemyAircrafts) {
                 if (enemyAircraft.notValid()) {
                     // 已被其他子弹击毁的敌机，不再检测
@@ -263,14 +311,10 @@ public class Game extends JPanel {
                         // TODO 获得分数，一定概率在同一位置产生道具补给
                         score += 10;
                         //如果消灭的是精英机则一定概率掉落道具
-                        if (enemyAircraft instanceof EliteEnemy) {
-                            int locationX = enemyAircraft.getLocationX();
-                            int locationY = enemyAircraft.getLocationY();
-                            AbstractProp abstractProp = produceProp(locationX, locationY);
-                            //如果返回null代表没掉落道具
-                            if (!Objects.isNull(abstractProp)) {
-                                props.add(abstractProp);
-                            }
+                        AbstractProp abstractProp = enemyAircraft.produceProp();
+                        //如果返回null代表没掉落道具
+                        if (!Objects.isNull(abstractProp)) {
+                            props.add(abstractProp);
                         }
                     }
                 }
@@ -280,7 +324,22 @@ public class Game extends JPanel {
                     heroAircraft.decreaseHp(Integer.MAX_VALUE);
                 }
             }
+            //对Boss机的检测
+            if (Objects.nonNull(boss)) {
+                if (boss.crash(bullet)) {
+                    boss.decreaseHp(bullet.getPower());
+                    bullet.vanish();
+                }
+                /*if (boss.notValid()) {
+                    score += 10;
+                }*/
+                if (boss.crash(heroAircraft) || heroAircraft.crash(boss)) {
+                    boss.vanish();
+                    heroAircraft.decreaseHp(Integer.MAX_VALUE);
+                }
+            }
         }
+
 
         // Todo: 我方获得道具，道具生效
         for (AbstractProp prop : props) {
@@ -289,12 +348,29 @@ public class Game extends JPanel {
             }
             if (heroAircraft.crash(prop)) {
                 // 英雄机碰到道具、产生道具效果
-                //注：之后要改成观察者模式，使用prop.notifyObservers();
+                /*
+                 * 注：之后要改成观察者模式，使用prop.notifyObservers();目前暂时写到Game类中
+                 */
                 if (prop instanceof BloodProp) {
-                    heroAircraft.increaseHp(30);
-                } else if (prop instanceof BombProp) {
-                    System.out.println("FireSupply active!");
+                    heroAircraft.increaseHp(300);
                 } else if (prop instanceof BulletProp) {
+                    //之后再改进
+                    if (isScattering) {
+                        lastThread.stop();
+                    }
+                    heroAircraft.setShootStrategy(new ScatteringShootStrategy());
+                    isScattering = true;
+                    lastThread = new Thread(()->{
+                        try {
+                            TimeUnit.SECONDS.sleep(5);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        heroAircraft.setShootStrategy(new StraightShootStrategy());
+                        isScattering = false;
+                    });
+                    lastThread.start();
+                } else if (prop instanceof BombProp) {
                     System.out.println("BombSupply active!");
                 }
                 prop.vanish();
@@ -303,29 +379,6 @@ public class Game extends JPanel {
 
     }
 
-    /**
-     * 以一定概率产生道具
-     *
-     * @param locationX 要产生道具的X坐标
-     * @param locationY 要产生道具的Y坐标
-     * @return 产生的道具（null代表不掉落道具）
-     */
-    private AbstractProp produceProp(int locationX, int locationY) {
-
-        long rand = System.currentTimeMillis();
-        //随机产生三种道具之一
-        //一半的概率产生道具（现在设置太低了不好测试）
-        if (rand % AbstractProp.PROBABILITY == BloodProp.CHOICE) {
-            return bloodPropFactory.createProp(locationX, locationY);
-        } else if (rand % AbstractProp.PROBABILITY == BombProp.CHOICE) {
-            return bombPropFactory.createProp(locationX, locationY);
-        } else if (rand % AbstractProp.PROBABILITY == BulletProp.CHOICE) {
-            return bulletPropFactory.createProp(locationX, locationY);
-        } else {
-            //返回null代表没掉落道具
-            return null;
-        }
-    }
 
     /**
      * 后处理：
@@ -341,6 +394,9 @@ public class Game extends JPanel {
         heroBullets.removeIf(AbstractFlyingObject::notValid);
         enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
         props.removeIf(AbstractFlyingObject::notValid);
+        if (Objects.nonNull(boss) && boss.notValid()) {
+            boss = null;
+        }
     }
 
 
@@ -374,6 +430,14 @@ public class Game extends JPanel {
         paintImageWithPositionRevised(g, heroBullets);
 
         paintImageWithPositionRevised(g, enemyAircrafts);
+
+        //绘制boss
+        if (!Objects.isNull(boss)) {
+            BufferedImage image = boss.getImage();
+            assert image != null : boss.getClass().getName() + " has no image! ";
+            g.drawImage(image, boss.getLocationX() - image.getWidth() / 2,
+                    boss.getLocationY() - image.getHeight() / 2, null);
+        }
 
 
         g.drawImage(ImageManager.HERO_IMAGE, heroAircraft.getLocationX() - ImageManager.HERO_IMAGE.getWidth() / 2,

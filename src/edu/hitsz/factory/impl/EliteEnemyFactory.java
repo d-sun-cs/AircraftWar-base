@@ -5,6 +5,8 @@ import edu.hitsz.aircraft.EliteEnemy;
 import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 import edu.hitsz.factory.EnemyFactory;
+import edu.hitsz.strategy.ScatteringShootStrategy;
+import edu.hitsz.strategy.StraightShootStrategy;
 
 public class EliteEnemyFactory implements EnemyFactory {
     @Override
@@ -14,8 +16,10 @@ public class EliteEnemyFactory implements EnemyFactory {
                 + ImageManager.ELITE_ENEMY_IMAGE.getWidth() / 2);
         int locationY = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.2);
         int speedX = System.currentTimeMillis() % 2 == 0 ? 3 : -3;
-        int speedY = 10;
+        int speedY = 8;
         int hp = 30;
-        return new EliteEnemy(locationX, locationY, speedX, speedY, hp);
+        EliteEnemy eliteEnemy = new EliteEnemy(locationX, locationY, speedX, speedY, hp);
+        eliteEnemy.setShootStrategy(new StraightShootStrategy());
+        return eliteEnemy;
     }
 }

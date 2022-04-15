@@ -2,6 +2,14 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
+import edu.hitsz.factory.PropFactory;
+import edu.hitsz.factory.impl.BloodPropFactory;
+import edu.hitsz.factory.impl.BombPropFactory;
+import edu.hitsz.factory.impl.BulletPropFactory;
+import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.prop.BloodProp;
+import edu.hitsz.prop.BombProp;
+import edu.hitsz.prop.BulletProp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,15 +25,17 @@ public class EliteEnemy extends MobEnemy {
     /**
      * 攻击方式——子弹一次发射数量
      */
-    private int shootNum = 1;
+    //private int shootNum = 1;
     /**
      * 攻击方式——子弹伤害
      */
-    private int power = 30;
+    private int power = 20;
     /**
      * 攻击方式——子弹射击方向 (向上发射：1，向下发射：-1)
      */
     private int direction = 1;
+
+    private PropFactory propFactory;
 
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
@@ -34,22 +44,35 @@ public class EliteEnemy extends MobEnemy {
     /**
      * 通过射击产生子弹
      * (之后要将该方法移交给一个射击策略类)
+     *
      * @return 射击出的子弹List
      */
     @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedX = 0;
-        int speedY = this.getSpeedY() + direction * 5;
-        BaseBullet baseBullet;
-        for (int i = 0; i < shootNum; i++) {
-            // 子弹发射位置相对飞机位置向前偏移
-            // 多个子弹横向分散
-            baseBullet = new EnemyBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
-            res.add(baseBullet);
+        return shootStrategy.shoot(EnemyBullet.class, locationX, locationY, direction, power, speedY);
+    }
+
+    /**
+     * 掉落道具
+     * 之所以在这个方法里new工厂，是因为这个工厂一定是只被使用一次的，
+     * 因为掉落道具意味着敌机已经坠毁了
+     * @return 道具
+     */
+    @Override
+    public AbstractProp produceProp() {
+        long rand = System.currentTimeMillis();
+        //随机产生三种道具之一
+        //一半的概率产生道具（现在设置太低了不好测试）
+        if (rand % AbstractProp.PROBABILITY == BloodProp.CHOICE) {
+            propFactory = new BloodPropFactory();
+        } else if (rand % AbstractProp.PROBABILITY == BombProp.CHOICE) {
+            propFactory = new BombPropFactory();
+        } else if (rand % AbstractProp.PROBABILITY == BulletProp.CHOICE) {
+            propFactory = new BulletPropFactory();
+        } else {
+            //返回null代表没掉落道具
+            return null;
         }
-        return res;
+        return propFactory.createProp(locationX, locationY);
     }
 }

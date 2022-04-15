@@ -2,6 +2,7 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.prop.AbstractProp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,12 +30,16 @@ public class MobEnemy extends AbstractAircraft {
 
     /**
      * 通过射击产生子弹（实际上并没有产生子弹）
-     * (之后要将该方法移交给一个射击策略类)
      * @return 射击出的子弹List
      */
     @Override
     public List<BaseBullet> shoot() {
         return new LinkedList<>();
+    }
+
+    @Override
+    public AbstractProp produceProp() {
+        return null;
     }
 
 }

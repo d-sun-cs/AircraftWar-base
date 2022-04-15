@@ -4,6 +4,9 @@ import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.HeroBullet;
+import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.ScatteringShootStrategy;
+import edu.hitsz.strategy.StraightShootStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +20,7 @@ public class HeroAircraft extends AbstractAircraft {
     /**
      * 单例T
      */
-    private static HeroAircraft singleton;
+    private static final HeroAircraft singleton;
 
     /**
      * 使用静态代码块的方式，在类加载时初始化单例（饿汉式）
@@ -27,8 +30,9 @@ public class HeroAircraft extends AbstractAircraft {
         int locationY = Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight();
         int speedX = 0;
         int speedY = 0;
-        int hp = 100;
+        int hp = 1000;
         singleton = new HeroAircraft(locationX, locationY, speedX, speedY, hp);
+        singleton.setShootStrategy(new StraightShootStrategy());
     }
 
     /**
@@ -56,9 +60,11 @@ public class HeroAircraft extends AbstractAircraft {
     /**
      * 攻击方式
      */
-    private int shootNum = 1;     //子弹一次发射数量
-    private int power = 30;       //子弹伤害
-    private int direction = -1;  //子弹射击方向 (向上发射：1，向下发射：-1)
+    //private int shootNum = 3;     //子弹一次发射数量
+    //子弹伤害
+    private int power = 30;
+    //子弹射击方向 (向上发射：1，向下发射：-1)
+    private int direction = -1;
 
     @Override
     public void forward() {
@@ -72,19 +78,16 @@ public class HeroAircraft extends AbstractAircraft {
      * @return 射击出的子弹List
      */
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedX = 0;
-        int speedY = this.getSpeedY() + direction * 5;
-        BaseBullet baseBullet;
-        for (int i = 0; i < shootNum; i++) {
-            // 子弹发射位置相对飞机位置向前偏移
-            // 多个子弹横向分散
-            baseBullet = new HeroBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
-            res.add(baseBullet);
-        }
-        return res;
+        return shootStrategy.shoot(HeroBullet.class, this.getLocationX(), this.getLocationY(), direction, power, 0);
+    }
+
+    /**
+     * 不掉落道具，空实现(目前不太符合接口隔离原则，待改进)
+     * @return null
+     */
+    @Override
+    public AbstractProp produceProp() {
+        return null;
     }
 
     /**
@@ -93,10 +96,15 @@ public class HeroAircraft extends AbstractAircraft {
      */
     public void increaseHp(int increase){
         //如果传入的increase不合法，直接返回
-        if (increase < 0) return;
+        if (increase < 0) {
+            return;
+        }
         //防止HP溢出
-        if (hp >= maxHp - increase) hp = maxHp;
-        else hp += increase;
+        if (hp >= maxHp - increase) {
+            hp = maxHp;
+        } else {
+            hp += increase;
+        }
     }
 
 }
