@@ -25,7 +25,7 @@ public class EliteEnemy extends MobEnemy {
     /**
      * 攻击方式——子弹一次发射数量
      */
-    //private int shootNum = 1;
+    private int shootNum = 1;
     /**
      * 攻击方式——子弹伤害
      */
@@ -49,7 +49,7 @@ public class EliteEnemy extends MobEnemy {
      */
     @Override
     public List<BaseBullet> shoot() {
-        return shootStrategy.shoot(EnemyBullet.class, locationX, locationY, direction, power, speedY);
+        return shootStrategy.shoot(EnemyBullet.class, locationX, locationY, direction, power, speedY, shootNum);
     }
 
     /**
@@ -62,7 +62,7 @@ public class EliteEnemy extends MobEnemy {
     public AbstractProp produceProp() {
         long rand = System.currentTimeMillis();
         //随机产生三种道具之一
-        //一半的概率产生道具（现在设置太低了不好测试）
+        //75%的概率产生道具（现在设置太低了不好测试）
         if (rand % AbstractProp.PROBABILITY == BloodProp.CHOICE) {
             propFactory = new BloodPropFactory();
         } else if (rand % AbstractProp.PROBABILITY == BombProp.CHOICE) {

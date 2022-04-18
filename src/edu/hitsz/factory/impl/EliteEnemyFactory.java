@@ -17,7 +17,7 @@ public class EliteEnemyFactory implements EnemyFactory {
         int locationY = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.2);
         int speedX = System.currentTimeMillis() % 2 == 0 ? 3 : -3;
         int speedY = 8;
-        int hp = 30;
+        int hp = 60;
         EliteEnemy eliteEnemy = new EliteEnemy(locationX, locationY, speedX, speedY, hp);
         eliteEnemy.setShootStrategy(new StraightShootStrategy());
         return eliteEnemy;

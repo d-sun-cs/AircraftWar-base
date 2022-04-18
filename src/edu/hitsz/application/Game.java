@@ -68,7 +68,7 @@ public class Game extends JPanel {
 
     private boolean gameOverFlag = false;
     private int score = 0;
-    private int step = 100;
+    private int step = 200;
     private int time = 0;
     /**
      * 周期（ms)
@@ -144,6 +144,7 @@ public class Game extends JPanel {
             // 撞击检测
             crashCheckAction();
 
+            //检测分数是否达到产生boss机的阈值
             scoreCheck();
 
             // 后处理
@@ -157,24 +158,7 @@ public class Game extends JPanel {
                 // 游戏结束
                 executorService.shutdown();
                 gameOverFlag = true;
-                User user = new User();
-                user.setCreateTime(System.currentTimeMillis());
-                user.setScore(score);
-                user.setName("testUserName");
-                user.setDifficulty(0);
-                userDao.saveUser(user);
-                List<User> userList = userDao.selectUsersOrderByScoreDesc();
-                System.out.println("**************************************************");
-                System.out.println("********************得分排行榜*********************");
-                System.out.println("**************************************************");
-                for (int i = 0; i < userList.size(); i++) {
-                    User usr = userList.get(i);
-                    System.out.printf("第%d名：" + usr.getName() + ", %d, "
-                            , i + 1, usr.getScore());
-                    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-                    String timeStr = sdf.format(new Date(usr.getCreateTime()));
-                    System.out.println(timeStr);
-                }
+                showRankingList();
                 System.out.println("Game Over!");
             }
 
@@ -186,6 +170,30 @@ public class Game extends JPanel {
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
+    }
+
+    /**
+     * 展示用户排行榜
+     */
+    private void showRankingList() {
+        User user = new User();
+        user.setCreateTime(System.currentTimeMillis());
+        user.setScore(score);
+        user.setName("testUserName");
+        user.setDifficulty(0);
+        userDao.saveUser(user);
+        List<User> userList = userDao.selectUsersOrderByScoreDesc();
+        System.out.println("**************************************************");
+        System.out.println("********************得分排行榜*********************");
+        System.out.println("**************************************************");
+        for (int i = 0; i < userList.size(); i++) {
+            User usr = userList.get(i);
+            System.out.printf("第%d名：" + usr.getName() + ", %d, "
+                    , i + 1, usr.getScore());
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+            String timeStr = sdf.format(new Date(usr.getCreateTime()));
+            System.out.println(timeStr);
+        }
     }
 
     /**
@@ -257,15 +265,18 @@ public class Game extends JPanel {
     }
 
 
+    /**
+     * 检查得分是否到达阈值，适时产生或刷新boss机
+     */
     private void scoreCheck() {
         if (score >= step) {
-            //没有boss则产生boss，已经有boss则销毁并产生新boss
+            //没有boss则产生boss，已经有boss则刷新boss
             if (Objects.nonNull(boss)) {
                 boss.vanish();
                 System.out.println("boss刷新");
             }
             boss = bossEnemyFactory.createEnemy();
-            step += 100;
+            step += step;
         }
     }
 
@@ -352,21 +363,23 @@ public class Game extends JPanel {
                  * 注：之后要改成观察者模式，使用prop.notifyObservers();目前暂时写到Game类中
                  */
                 if (prop instanceof BloodProp) {
-                    heroAircraft.increaseHp(300);
+                    heroAircraft.increaseHp(100);
                 } else if (prop instanceof BulletProp) {
                     //之后再改进
                     if (isScattering) {
                         lastThread.stop();
                     }
                     heroAircraft.setShootStrategy(new ScatteringShootStrategy());
+                    heroAircraft.setShootNum(5);
                     isScattering = true;
-                    lastThread = new Thread(()->{
+                    lastThread = new Thread(() -> {
                         try {
                             TimeUnit.SECONDS.sleep(5);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         heroAircraft.setShootStrategy(new StraightShootStrategy());
+                        heroAircraft.setShootNum(2);
                         isScattering = false;
                     });
                     lastThread.start();

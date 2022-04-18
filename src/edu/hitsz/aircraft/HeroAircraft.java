@@ -57,10 +57,18 @@ public class HeroAircraft extends AbstractAircraft {
         super(locationX, locationY, speedX, speedY, hp);
     }
 
+    public void setShootNum(int shootNum) {
+        if (shootNum < 0) {
+            this.shootNum = 1;
+        } else {
+            this.shootNum = shootNum;
+        }
+    }
+
     /**
      * 攻击方式
      */
-    //private int shootNum = 3;     //子弹一次发射数量
+    private int shootNum = 2;     //子弹一次发射数量
     //子弹伤害
     private int power = 30;
     //子弹射击方向 (向上发射：1，向下发射：-1)
@@ -78,7 +86,7 @@ public class HeroAircraft extends AbstractAircraft {
      * @return 射击出的子弹List
      */
     public List<BaseBullet> shoot() {
-        return shootStrategy.shoot(HeroBullet.class, this.getLocationX(), this.getLocationY(), direction, power, 0);
+        return shootStrategy.shoot(HeroBullet.class, this.getLocationX(), this.getLocationY(), direction, power, speedY, shootNum);
     }
 
     /**

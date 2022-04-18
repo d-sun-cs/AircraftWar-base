@@ -1,0 +1,28 @@
+@startuml
+
+class User {
+    - String name
+    - Integer score
+    - Long createTime
+    - Integer difficulty
+}
+
+interface UserDao {
+    + selectUsersOrderByScoreDesc():List<User>
+    + saveUser(User user):void
+}
+
+class UserDaoImpl {
+    + selectUsersOrderByScoreDesc():List<User>
+    + saveUser(User user):void
+}
+UserDao <|.. UserDaoImpl
+UserDaoImpl ..> User
+
+class Game {
+    - UserDao userDao
+}
+
+Game ..> User
+UserDao <--o Game
+@enduml

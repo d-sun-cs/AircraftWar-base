@@ -9,15 +9,15 @@ import java.util.List;
  */
 public interface UserDao {
     /**
-     * 按得分从高到低查询用户
-     * @return
+     * 按得分从高到低查询用户（模拟order by关键字）
+     * @return 按得分排好序的用户集合
      */
     List<User> selectUsersOrderByScoreDesc();
 
     /**
      * 保存用户
      * @param user
-     * @return
+     * @return 暂时返回void，之后可能修改成boolean
      */
     void saveUser(User user);
 }

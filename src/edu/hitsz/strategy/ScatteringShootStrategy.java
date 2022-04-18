@@ -13,20 +13,22 @@ import java.util.List;
  */
 public class ScatteringShootStrategy implements ShootStrategy {
     @Override
-    public List<BaseBullet> shoot(Class<? extends BaseBullet> bulletClass, int locationX, int locationY, int direction, int power, int speedY) {
+    public List<BaseBullet> shoot(Class<? extends BaseBullet> bulletClass,
+                                  int locationX, int locationY,
+                                  int direction, int power, int speedY, int shootNum) {
         List<BaseBullet> res = new LinkedList<>();
         int x = locationX;
         int y = locationY + direction * 2;
-        int speedX = -5;
+        int speedX = -1 * (shootNum - 1);
         speedY = speedY + direction * 7;
-        for (int i = 0; i < 3; i++, speedX += 5) {
+        for (int i = 0; i < shootNum; i++, speedX += 2) {
             // 子弹发射位置相对飞机位置向前偏移
             // 多个子弹横向分散
             Constructor<? extends BaseBullet> constructor = null;
             BaseBullet baseBullet = null;
             try {
                 constructor = bulletClass.getDeclaredConstructor(int.class, int.class, int.class, int.class, int.class);
-                baseBullet = constructor.newInstance(x + (i * 2 - 3 + 1) * 10, y, speedX, speedY, power);
+                baseBullet = constructor.newInstance(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
             } catch (Exception e) {
                 e.printStackTrace();
             }

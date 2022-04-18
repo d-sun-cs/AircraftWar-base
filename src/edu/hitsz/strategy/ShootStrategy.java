@@ -20,5 +20,5 @@ public interface ShootStrategy {
      */
     List<BaseBullet> shoot(Class<? extends BaseBullet> bulletClass,
                            int locationX, int locationY,
-                           int direction, int power, int speedY);
+                           int direction, int power, int speedY, int shootNum);
 }

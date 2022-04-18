@@ -11,7 +11,7 @@ public class BossEnemyFactory implements EnemyFactory {
     @Override
     public AbstractAircraft createEnemy() {
         AbstractAircraft boss = new BossEnemy(Main.WINDOW_WIDTH / 2, ImageManager.BOSS_IMAGE.getHeight(),
-                0, 0, 300);
+                0, 0, 600);
         boss.setShootStrategy(new ScatteringShootStrategy());
         return boss;
     }
