@@ -23,7 +23,7 @@ abstract class AbstractAircraft {
 AbstractAircraft o--> ShootStrategy
 
 class Game {
-    - List<AbstractAircraft>: heroAircraft
+    - HeroAircraft: heroAircraft
     - List<AbstractAircraft>: enemyAircrafts
     - AbstractAircraft: boss
     + action():void
