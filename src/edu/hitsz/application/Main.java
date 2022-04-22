@@ -95,7 +95,7 @@ public class Main {
             frame.setVisible(true);
             //展示确认窗口
             Input input = new Input(game.getScore(), game.getDifficulty());
-            JFrame inputFrame = new JFrame("确认");
+            JFrame inputFrame = new JFrame("记录分数");
             input.setSelf(inputFrame);
             input.setBoard(board);
             inputFrame.setLocationRelativeTo(null);

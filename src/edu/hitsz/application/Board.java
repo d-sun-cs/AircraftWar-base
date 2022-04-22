@@ -71,7 +71,7 @@ public class Board {
                 Long createTime = userList.get(row).getCreateTime();
                 //弹窗
                 Delete delete = new Delete(createTime);
-                JFrame deleteFrame = new JFrame("确认");
+                JFrame deleteFrame = new JFrame("删除");
                 delete.setSelf(deleteFrame);
                 delete.setBoard(this);
                 deleteFrame.setLocationRelativeTo(null);

@@ -17,8 +17,6 @@ public class Input {
     private JPanel mainPanel;
     private JPanel bottomPanel;
     private JPanel topPanel;
-    private JPanel topLeftPanel;
-    private JPanel topRightPanel;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -28,7 +26,6 @@ public class Input {
     private JButton cancel;
     private JTextArea description;
     private JTextField input;
-    private JLabel testLabel;
 
     private JFrame self;
     private Board board;

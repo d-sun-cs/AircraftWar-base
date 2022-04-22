@@ -19,7 +19,7 @@
           <component id="9d875" class="javax.swing.JTextField" binding="description">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="8" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="-1"/>
+                <preferred-size width="-1" height="30"/>
               </grid>
             </constraints>
             <properties>
