@@ -18,7 +18,7 @@ public class Menu {
         return mainPanel;
     }
 
-    private JComboBox music;
+    private JComboBox<String> music;
     private JButton simple;
     private JButton difficult;
     private JTextField musicText;
@@ -49,6 +49,7 @@ public class Menu {
             }
             game.setDifficulty(0);
             Status.menuOver = true;
+            game.setUseMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }
@@ -62,6 +63,7 @@ public class Menu {
             }
             game.setDifficulty(1);
             Status.menuOver = true;
+            game.setUseMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }
@@ -75,6 +77,7 @@ public class Menu {
             }
             game.setDifficulty(2);
             Status.menuOver = true;
+            game.setUseMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }

@@ -98,6 +98,11 @@ public class Game extends JPanel {
      * 6:get_supply
      */
     private MusicThread[] musicThreads = new MusicThread[7];
+    private boolean useMusic = true;
+
+    public void setUseMusic(boolean useMusic) {
+        this.useMusic = useMusic;
+    }
 
     public Integer getDifficulty() {
         return difficulty;
@@ -173,7 +178,9 @@ public class Game extends JPanel {
             scoreCheck();
 
             //检查音乐
-            musicCheck();
+            if (useMusic) {
+                musicCheck();
+            }
 
             // 后处理
             postProcessAction();
@@ -185,9 +192,11 @@ public class Game extends JPanel {
             if (!gameOverFlag && heroAircraft.getHp() <= 0) {
                 // 游戏结束
                 //播放游戏结束音频
-                MusicThread gameOverMusic = new MusicThread("src/videos/game_over.wav");
-                musicThreads[5] = gameOverMusic;
-                gameOverMusic.start();
+                if (useMusic) {
+                    MusicThread gameOverMusic = new MusicThread("src/videos/game_over.wav");
+                    musicThreads[5] = gameOverMusic;
+                    gameOverMusic.start();
+                }
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
@@ -195,9 +204,15 @@ public class Game extends JPanel {
                     Status.gameOver = true;
                     Status.class.notifyAll();
                 }
-                for (MusicThread music : musicThreads) {
-                    if (Objects.nonNull(music)) {
-                        music.setStop(true);
+                for (int i = 0; i < 7; i++) {
+                    if (i == 5) {
+                        try {
+                            musicThreads[i].join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (Objects.nonNull(musicThreads[i])) {
+                        musicThreads[i].setStop(true);
                     }
                 }
                 //showRankingList();
@@ -211,9 +226,11 @@ public class Game extends JPanel {
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
-        MusicThread bgm = new MusicThread("src/videos/bgm.wav");
-        musicThreads[0] = bgm;
-        bgm.start();
+        if (useMusic) {
+            MusicThread bgm = new MusicThread("src/videos/bgm.wav");
+            musicThreads[0] = bgm;
+            bgm.start();
+        }
     }
 
     private void musicCheck() {
@@ -292,10 +309,12 @@ public class Game extends JPanel {
     }
 
     private void shootAction() {
-        //播放子弹音频
-        MusicThread bulletMusic = new MusicThread("src/videos/bullet.wav");
-        bulletMusic.start();
-        musicThreads[3] = bulletMusic;
+        if (useMusic) {
+            //播放子弹音频
+            MusicThread bulletMusic = new MusicThread("src/videos/bullet.wav");
+            bulletMusic.start();
+            musicThreads[3] = bulletMusic;
+        }
         // TODO 敌机射击
         //普通敌机射出的子弹数目为0，不影响结果
         List<BaseBullet> enemyBullets0 = enemyAircrafts.stream()
@@ -347,11 +366,13 @@ public class Game extends JPanel {
             }
             boss = bossEnemyFactory.createEnemy();
             step += 200;
-            //如果此前没有播放boss音乐，则开放播放boss音乐
-            if (Objects.isNull(musicThreads[1]) || !musicThreads[1].isAlive()) {
-                MusicThread bossBgm = new MusicThread("src/videos/bgm_boss.wav");
-                musicThreads[1] = bossBgm;
-                bossBgm.start();
+            if (useMusic) {
+                //如果此前没有播放boss音乐，则开放播放boss音乐
+                if (Objects.isNull(musicThreads[1]) || !musicThreads[1].isAlive()) {
+                    MusicThread bossBgm = new MusicThread("src/videos/bgm_boss.wav");
+                    musicThreads[1] = bossBgm;
+                    bossBgm.start();
+                }
             }
         }
     }
@@ -369,6 +390,12 @@ public class Game extends JPanel {
                 continue;
             }
             if (heroAircraft.crash(bullet)) {
+                if (useMusic) {
+                    //播放子弹击中音频
+                    MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
+                    musicThreads[4] = bulletHit;
+                    bulletHit.start();
+                }
                 // 英雄机撞击到敌机子弹
                 // 英雄机损失一定生命值
                 heroAircraft.decreaseHp(bullet.getPower());
@@ -389,10 +416,12 @@ public class Game extends JPanel {
                     continue;
                 }
                 if (enemyAircraft.crash(bullet)) {
-                    //播放子弹击中音频
-                    MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
-                    musicThreads[4] = bulletHit;
-                    bulletHit.start();
+                    if (useMusic) {
+                        //播放子弹击中音频
+                        MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
+                        musicThreads[4] = bulletHit;
+                        bulletHit.start();
+                    }
                     // 敌机撞击到英雄机子弹
                     // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
@@ -418,10 +447,12 @@ public class Game extends JPanel {
             //对Boss机的检测
             if (Objects.nonNull(boss)) {
                 if (boss.crash(bullet)) {
-                    //播放子弹击中音频
-                    MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
-                    musicThreads[4] = bulletHit;
-                    bulletHit.start();
+                    if (useMusic) {
+                        //播放子弹击中音频
+                        MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
+                        musicThreads[4] = bulletHit;
+                        bulletHit.start();
+                    }
                     boss.decreaseHp(bullet.getPower());
                     bullet.vanish();
                 }
@@ -447,10 +478,12 @@ public class Game extends JPanel {
                  * 注：之后要改成观察者模式，使用prop.notifyObservers();目前暂时写到Game类中
                  */
                 if (prop instanceof BloodProp) {
-                    //播放游戏supply音频
-                    MusicThread getSupplyMusic = new MusicThread("src/videos/get_supply.wav");
-                    musicThreads[6] = getSupplyMusic;
-                    getSupplyMusic.start();
+                    if (useMusic) {
+                        //播放游戏supply音频
+                        MusicThread getSupplyMusic = new MusicThread("src/videos/get_supply.wav");
+                        musicThreads[6] = getSupplyMusic;
+                        getSupplyMusic.start();
+                    }
                     heroAircraft.increaseHp(100);
                 } else if (prop instanceof BulletProp) {
                     //之后再改进
@@ -473,9 +506,11 @@ public class Game extends JPanel {
                     lastThread.start();
                 } else if (prop instanceof BombProp) {
                     System.out.println("BombSupply active!");
-                    MusicThread bombMusic = new MusicThread("src/videos/bomb_explosion.wav");
-                    bombMusic.start();
-                    musicThreads[2] = bombMusic;
+                    if (useMusic) {
+                        MusicThread bombMusic = new MusicThread("src/videos/bomb_explosion.wav");
+                        bombMusic.start();
+                        musicThreads[2] = bombMusic;
+                    }
                 }
                 prop.vanish();
             }

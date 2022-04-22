@@ -84,7 +84,15 @@ public class Board {
                 deleteFrame.setVisible(true);
             }
         });
-        difficulty.setText("难度：" + diffNum);
+        String diffStr = "难度：";
+        if (diffNum == 0) {
+            diffStr += "简单";
+        } else if (diffNum == 1) {
+            diffStr += "普通";
+        } else if (diffNum == 2) {
+            diffStr += "困难";
+        }
+        difficulty.setText(diffStr);
     }
 
     public void refresh() {

@@ -82,14 +82,14 @@ public class MusicThread extends Thread {
         try {
             int numBytesRead = 0;
             while (numBytesRead != -1 && !isStop) {
-				//从音频流读取指定的最大数量的数据字节，并将其放入缓冲区中
+                //从音频流读取指定的最大数量的数据字节，并将其放入缓冲区中
                 numBytesRead =
                         source.read(buffer, 0, buffer.length);
-				//通过此源数据行将数据写入混频器
+                //通过此源数据行将数据写入混频器
                 if (numBytesRead != -1) {
                     dataLine.write(buffer, 0, numBytesRead);
                 }
-                System.out.println("我在读音频" + filename);
+                System.out.println(Thread.currentThread().getName() + "在读音频" + filename);
             }
 
         } catch (IOException ex) {
