@@ -27,6 +27,10 @@ public class User implements Serializable {
 
     private Integer difficulty;
 
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
     public String getName() {
         return name;
     }

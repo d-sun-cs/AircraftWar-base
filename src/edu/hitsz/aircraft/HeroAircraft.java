@@ -30,7 +30,7 @@ public class HeroAircraft extends AbstractAircraft {
         int locationY = Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight();
         int speedX = 0;
         int speedY = 0;
-        int hp = 1000;
+        int hp = 10000;
         singleton = new HeroAircraft(locationX, locationY, speedX, speedY, hp);
         singleton.setShootStrategy(new StraightShootStrategy());
     }

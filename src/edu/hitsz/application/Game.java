@@ -68,6 +68,11 @@ public class Game extends JPanel {
 
     private boolean gameOverFlag = false;
     private int score = 0;
+
+    public int getScore() {
+        return score;
+    }
+
     private int step = 200;
     private int time = 0;
     /**
@@ -78,9 +83,29 @@ public class Game extends JPanel {
     private int cycleTime = 0;
 
     /**
-     * dao
+     * 难度与音效
      */
-    UserDao userDao = new UserDaoImpl();
+    //UserDao userDao = new UserDaoImpl();
+    private Integer difficulty = 0;
+    /**
+     * 7个位置分别管理7个音频
+     * 0:bgm
+     * 1:bgm_boss
+     * 2:bomb_explosion
+     * 3:bullet
+     * 4:bullet_hit
+     * 5:game_over
+     * 6:get_supply
+     */
+    private MusicThread[] musicThreads = new MusicThread[7];
+
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(Integer difficulty) {
+        this.difficulty = difficulty;
+    }
 
     /**
      * 射击相关，暂时写在Game中，之后使用观察者模式会放在道具中
@@ -147,6 +172,9 @@ public class Game extends JPanel {
             //检测分数是否达到产生boss机的阈值
             scoreCheck();
 
+            //检查音乐
+            musicCheck();
+
             // 后处理
             postProcessAction();
 
@@ -156,10 +184,23 @@ public class Game extends JPanel {
             // 游戏结束检查
             if (!gameOverFlag && heroAircraft.getHp() <= 0) {
                 // 游戏结束
+                //播放游戏结束音频
+                MusicThread gameOverMusic = new MusicThread("src/videos/game_over.wav");
+                musicThreads[5] = gameOverMusic;
+                gameOverMusic.start();
                 executorService.shutdown();
                 gameOverFlag = true;
-                showRankingList();
                 System.out.println("Game Over!");
+                synchronized (Status.class) {
+                    Status.gameOver = true;
+                    Status.class.notifyAll();
+                }
+                for (MusicThread music : musicThreads) {
+                    if (Objects.nonNull(music)) {
+                        music.setStop(true);
+                    }
+                }
+                //showRankingList();
             }
 
         };
@@ -170,12 +211,37 @@ public class Game extends JPanel {
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
+        MusicThread bgm = new MusicThread("src/videos/bgm.wav");
+        musicThreads[0] = bgm;
+        bgm.start();
+    }
+
+    private void musicCheck() {
+        //背景音乐循环播放
+        if (!musicThreads[0].isAlive()) {
+            MusicThread bgm = new MusicThread("src/videos/bgm.wav");
+            musicThreads[0] = bgm;
+            bgm.start();
+        }
+        //boss音乐
+        if (Objects.isNull(boss) || boss.notValid()) {
+            if (Objects.nonNull(musicThreads[1])) {
+                musicThreads[1].setStop(true);
+                musicThreads[1] = null;
+            }
+        } else {
+            if (Objects.isNull(musicThreads[1]) || !musicThreads[1].isAlive()) {
+                MusicThread bossBgm = new MusicThread("src/videos/bgm_boss.wav");
+                musicThreads[1] = bossBgm;
+                bossBgm.start();
+            }
+        }
     }
 
     /**
      * 展示用户排行榜
      */
-    private void showRankingList() {
+    /*private void showRankingList() {
         User user = new User();
         user.setCreateTime(System.currentTimeMillis());
         user.setScore(score);
@@ -194,7 +260,7 @@ public class Game extends JPanel {
             String timeStr = sdf.format(new Date(usr.getCreateTime()));
             System.out.println(timeStr);
         }
-    }
+    }*/
 
     /**
      * 以一定概率产生普通敌机或精英敌机
@@ -226,6 +292,10 @@ public class Game extends JPanel {
     }
 
     private void shootAction() {
+        //播放子弹音频
+        MusicThread bulletMusic = new MusicThread("src/videos/bullet.wav");
+        bulletMusic.start();
+        musicThreads[3] = bulletMusic;
         // TODO 敌机射击
         //普通敌机射出的子弹数目为0，不影响结果
         List<BaseBullet> enemyBullets0 = enemyAircrafts.stream()
@@ -276,7 +346,13 @@ public class Game extends JPanel {
                 System.out.println("boss刷新");
             }
             boss = bossEnemyFactory.createEnemy();
-            step += step;
+            step += 200;
+            //如果此前没有播放boss音乐，则开放播放boss音乐
+            if (Objects.isNull(musicThreads[1]) || !musicThreads[1].isAlive()) {
+                MusicThread bossBgm = new MusicThread("src/videos/bgm_boss.wav");
+                musicThreads[1] = bossBgm;
+                bossBgm.start();
+            }
         }
     }
 
@@ -313,6 +389,10 @@ public class Game extends JPanel {
                     continue;
                 }
                 if (enemyAircraft.crash(bullet)) {
+                    //播放子弹击中音频
+                    MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
+                    musicThreads[4] = bulletHit;
+                    bulletHit.start();
                     // 敌机撞击到英雄机子弹
                     // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
@@ -320,7 +400,7 @@ public class Game extends JPanel {
                     //如果英雄子弹消灭了敌机
                     if (enemyAircraft.notValid()) {
                         // TODO 获得分数，一定概率在同一位置产生道具补给
-                        score += 10;
+                        score += 20;
                         //如果消灭的是精英机则一定概率掉落道具
                         AbstractProp abstractProp = enemyAircraft.produceProp();
                         //如果返回null代表没掉落道具
@@ -338,6 +418,10 @@ public class Game extends JPanel {
             //对Boss机的检测
             if (Objects.nonNull(boss)) {
                 if (boss.crash(bullet)) {
+                    //播放子弹击中音频
+                    MusicThread bulletHit = new MusicThread("src/videos/bullet_hit.wav");
+                    musicThreads[4] = bulletHit;
+                    bulletHit.start();
                     boss.decreaseHp(bullet.getPower());
                     bullet.vanish();
                 }
@@ -363,6 +447,10 @@ public class Game extends JPanel {
                  * 注：之后要改成观察者模式，使用prop.notifyObservers();目前暂时写到Game类中
                  */
                 if (prop instanceof BloodProp) {
+                    //播放游戏supply音频
+                    MusicThread getSupplyMusic = new MusicThread("src/videos/get_supply.wav");
+                    musicThreads[6] = getSupplyMusic;
+                    getSupplyMusic.start();
                     heroAircraft.increaseHp(100);
                 } else if (prop instanceof BulletProp) {
                     //之后再改进
@@ -385,6 +473,9 @@ public class Game extends JPanel {
                     lastThread.start();
                 } else if (prop instanceof BombProp) {
                     System.out.println("BombSupply active!");
+                    MusicThread bombMusic = new MusicThread("src/videos/bomb_explosion.wav");
+                    bombMusic.start();
+                    musicThreads[2] = bombMusic;
                 }
                 prop.vanish();
             }

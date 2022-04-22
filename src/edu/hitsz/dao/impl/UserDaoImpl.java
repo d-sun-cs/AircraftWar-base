@@ -7,13 +7,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author SunDocker
  */
 public class UserDaoImpl implements UserDao {
     @Override
-    public List<User> selectUsersOrderByScoreDesc() {
+    public List<User> selectUsersOrderByScoreDesc(int diffNum) {
         File file = new File("userObjects");
         List<User> userList = new ArrayList<>();
         for (File userObj : file.listFiles()) {
@@ -21,6 +22,9 @@ public class UserDaoImpl implements UserDao {
             try {
                 ois = new ObjectInputStream(new FileInputStream(userObj));
                 User user = (User) ois.readObject();
+                if (user.getDifficulty() != diffNum) {
+                    continue;
+                }
                 for (int i = 0; i <= userList.size(); i++) {
                     if (i == userList.size()) {
                         userList.add(i, user);
@@ -64,6 +68,37 @@ public class UserDaoImpl implements UserDao {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public void deleteUser(Long createTime) {
+        File file = new File("userObjects");
+        File deleteFile = null;
+        for (File userObj : file.listFiles()) {
+            ObjectInputStream ois = null;
+            try {
+                ois = new ObjectInputStream(new FileInputStream(userObj));
+                User user = (User) ois.readObject();
+                if (Objects.equals(user.getCreateTime(), createTime)) {
+                    System.out.println(user.getCreateTime());
+                    deleteFile = userObj;
+                    break;
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (ois != null) {
+                    try {
+                        ois.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        if (deleteFile != null) {
+            System.out.println(deleteFile.delete());
         }
     }
 }
