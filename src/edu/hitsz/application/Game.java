@@ -191,29 +191,29 @@ public class Game extends JPanel {
             // 游戏结束检查
             if (!gameOverFlag && heroAircraft.getHp() <= 0) {
                 // 游戏结束
-                //播放游戏结束音频
-                if (useMusic) {
-                    MusicThread gameOverMusic = new MusicThread("src/videos/game_over.wav");
-                    musicThreads[5] = gameOverMusic;
-                    gameOverMusic.start();
-                }
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+                if (useMusic) {
+                    for (int i = 0; i < 7; i++) {
+                        if (i == 5) {
+                            //播放游戏结束音频
+                            MusicThread gameOverMusic = new MusicThread("src/videos/game_over.wav");
+                            musicThreads[5] = gameOverMusic;
+                            gameOverMusic.start();
+                        } else if (Objects.nonNull(musicThreads[i])) {
+                            musicThreads[i].setStop(true);
+                        }
+                    }
+                }
+                try {
+                    musicThreads[5].join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 synchronized (Status.class) {
                     Status.gameOver = true;
                     Status.class.notifyAll();
-                }
-                for (int i = 0; i < 7; i++) {
-                    if (i == 5) {
-                        try {
-                            musicThreads[i].join();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (Objects.nonNull(musicThreads[i])) {
-                        musicThreads[i].setStop(true);
-                    }
                 }
                 //showRankingList();
             }

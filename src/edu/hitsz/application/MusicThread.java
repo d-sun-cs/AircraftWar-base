@@ -89,7 +89,7 @@ public class MusicThread extends Thread {
                 if (numBytesRead != -1) {
                     dataLine.write(buffer, 0, numBytesRead);
                 }
-                System.out.println(Thread.currentThread().getName() + "在读音频" + filename);
+                //System.out.println(Thread.currentThread().getName() + "在读音频" + filename);
             }
 
         } catch (IOException ex) {

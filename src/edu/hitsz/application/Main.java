@@ -9,6 +9,7 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 程序入口
@@ -74,20 +75,6 @@ public class Main {
                 }
             }
             //展示排行榜
-            /*UserDao userDao = new UserDaoImpl();
-            List<User> userList = userDao.selectUsersOrderByScoreDesc();
-            int userNum = userList.size();
-            String[] columnName = {"名次", "玩家名", "得分", "记录时间"};
-            String[][] tableData = new String[userNum][4];
-            for (int i = 0; i < userNum; i++) {
-                User usr = userList.get(i);
-                tableData[i][0] = (i + 1) + "";
-                tableData[i][1] = usr.getName();
-                tableData[i][2] = usr.getScore() + "";
-                SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-                String timeStr = sdf.format(new Date(usr.getCreateTime()));
-                tableData[i][3] = timeStr;
-            }*/
             Board board = new Board(game.getDifficulty());
             JPanel boardPanel = board.getMainPanel();
             frame.remove(game);
