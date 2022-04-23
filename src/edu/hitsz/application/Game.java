@@ -488,7 +488,7 @@ public class Game extends JPanel {
                 } else if (prop instanceof BulletProp) {
                     //之后再改进
                     if (isScattering) {
-                        lastThread.stop();
+                        lastThread.interrupt();
                     }
                     heroAircraft.setShootStrategy(new ScatteringShootStrategy());
                     heroAircraft.setShootNum(5);
@@ -496,12 +496,12 @@ public class Game extends JPanel {
                     lastThread = new Thread(() -> {
                         try {
                             TimeUnit.SECONDS.sleep(5);
+                            heroAircraft.setShootStrategy(new StraightShootStrategy());
+                            heroAircraft.setShootNum(2);
+                            isScattering = false;
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            System.out.println(e.getMessage());
                         }
-                        heroAircraft.setShootStrategy(new StraightShootStrategy());
-                        heroAircraft.setShootNum(2);
-                        isScattering = false;
                     });
                     lastThread.start();
                 } else if (prop instanceof BombProp) {
