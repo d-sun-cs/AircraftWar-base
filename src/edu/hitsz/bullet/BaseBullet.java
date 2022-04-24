@@ -1,6 +1,7 @@
 package edu.hitsz.bullet;
 
 import edu.hitsz.application.Main;
+import edu.hitsz.application.MusicThread;
 import edu.hitsz.basic.AbstractFlyingObject;
 
 /**
@@ -38,5 +39,13 @@ public class BaseBullet extends AbstractFlyingObject {
 
     public int getPower() {
         return power;
+    }
+
+    public void vanish(boolean needMusic) {
+        super.vanish();
+        //播放子弹击中音频
+        if (needMusic) {
+            new MusicThread("src/videos/bullet_hit.wav").start();
+        }
     }
 }

@@ -27,6 +27,8 @@ public abstract class AbstractProp extends AbstractFlyingObject {
         }
     }
 
+    abstract public void vanish(boolean needMusic);
+
     /**
      * 观察者模式的通知方法
      * （现在还没实现观察者模式，只是定义方法）

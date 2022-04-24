@@ -94,10 +94,12 @@ public class MusicThread extends Thread {
 
         } catch (IOException ex) {
             ex.printStackTrace();
+        } finally {
+            if (!isStop) {
+                dataLine.drain();
+            }
+            dataLine.close();
         }
-
-        dataLine.drain();
-        dataLine.close();
 
     }
 
