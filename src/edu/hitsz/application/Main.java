@@ -1,15 +1,12 @@
 package edu.hitsz.application;
 
-import edu.hitsz.dao.UserDao;
-import edu.hitsz.dao.impl.UserDaoImpl;
-import edu.hitsz.dao.pojo.User;
+import edu.hitsz.application.game.DifficultGame;
+import edu.hitsz.application.game.EasyGame;
+import edu.hitsz.application.game.Game;
+import edu.hitsz.application.game.SimpleGame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 程序入口
@@ -19,6 +16,8 @@ public class Main {
 
     public static final int WINDOW_WIDTH = 512;
     public static final int WINDOW_HEIGHT = 768;
+
+    public static Game game;
 
     public static void main(String[] args) {
 
@@ -34,9 +33,7 @@ public class Main {
                 WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Game game = new Game();
         Menu m = new Menu();
-        m.setGame(game);
         JPanel menu = m.getMainPanel();
 
         //new Thread(() -> {
@@ -47,7 +44,6 @@ public class Main {
             frame.add(menu);
             frame.setVisible(true);
         //}).start();
-
         new Thread(()->{
             synchronized (Status.class) {
                 while(!Status.menuOver) {
@@ -58,9 +54,20 @@ public class Main {
                     }
                 }
             }
+            if (Game.getDifficulty() == 0) {
+                game = new EasyGame();
+            } else if (Game.getDifficulty() == 1) {
+                game = new SimpleGame();
+            } else if (Game.getDifficulty() == 2) {
+                game = new DifficultGame();
+            } else {
+                throw new RuntimeException("难度选择异常");
+            }
             frame.remove(menu);
             frame.add(game);
             frame.setVisible(true);
+            game.setFocusable(true);
+            game.requestFocus();
             game.action();
         }).start();
 
@@ -75,13 +82,13 @@ public class Main {
                 }
             }
             //展示排行榜
-            Board board = new Board(game.getDifficulty());
+            Board board = new Board(Game.getDifficulty());
             JPanel boardPanel = board.getMainPanel();
             frame.remove(game);
             frame.add(boardPanel);
             frame.setVisible(true);
             //展示确认窗口
-            Input input = new Input(game.getScore(), game.getDifficulty());
+            Input input = new Input(Game.getScore(), Game.getDifficulty());
             JFrame inputFrame = new JFrame("记录分数");
             input.setSelf(inputFrame);
             input.setBoard(board);
@@ -98,7 +105,4 @@ public class Main {
     }
 }
 
-class Status {
-    public static boolean menuOver = false;
-    public static boolean gameOver = false;
-}
+

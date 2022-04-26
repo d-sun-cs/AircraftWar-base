@@ -11,7 +11,6 @@ import edu.hitsz.prop.BloodProp;
 import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.BulletProp;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,9 +18,9 @@ import java.util.List;
  */
 public class EliteEnemy extends MobEnemy {
     /**
-     * 精英敌机产生概率的倒数
+     * 精英敌机产生概率的倒数，默认是5
      */
-    public static final int PROBABILITY = 3;
+    public static int probability = 5;
     /**
      * 攻击方式——子弹一次发射数量
      */

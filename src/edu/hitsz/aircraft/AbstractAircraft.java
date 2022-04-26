@@ -24,6 +24,15 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
      * 射击策略
      */
     protected ShootStrategy shootStrategy;
+    protected int shootNum;
+
+    public void setShootNum(int shootNum) {
+        if (shootNum < 0) {
+            this.shootNum = 1;
+        } else {
+            this.shootNum = shootNum;
+        }
+    }
 
     public void setShootStrategy(ShootStrategy shootStrategy) {
         this.shootStrategy = shootStrategy;
@@ -51,6 +60,23 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
         return hp;
     }
 
+    /**
+     * 增加HP
+     * @param increase
+     */
+    public void increaseHp(int increase){
+        //如果传入的increase不合法，直接返回
+        if (increase < 0) {
+            return;
+        }
+        //防止HP溢出
+        if (hp >= maxHp - increase) {
+            hp = maxHp;
+        } else {
+            hp += increase;
+        }
+    }
+
 
     /**
      * 飞机射击方法，可射击对象必须实现
@@ -71,7 +97,7 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
     /**
      * 观察者模式中的更新方法（之后实验再实现）
      */
-    //public abstract void update();
+    public abstract void update(Class<? extends AbstractProp> propClass);
 
 }
 

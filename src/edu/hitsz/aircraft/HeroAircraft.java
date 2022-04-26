@@ -5,11 +5,14 @@ import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.prop.BloodProp;
+import edu.hitsz.prop.BulletProp;
 import edu.hitsz.strategy.ScatteringShootStrategy;
 import edu.hitsz.strategy.StraightShootStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 英雄飞机，游戏玩家操控
@@ -35,6 +38,9 @@ public class HeroAircraft extends AbstractAircraft {
         singleton.setShootStrategy(new StraightShootStrategy());
     }
 
+    private boolean isScattering = false;
+    private Thread scatteringThread;
+
     /**
      * 对外提供获得单例的方法
      *
@@ -55,14 +61,6 @@ public class HeroAircraft extends AbstractAircraft {
      */
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
-    }
-
-    public void setShootNum(int shootNum) {
-        if (shootNum < 0) {
-            this.shootNum = 1;
-        } else {
-            this.shootNum = shootNum;
-        }
     }
 
     /**
@@ -98,20 +96,31 @@ public class HeroAircraft extends AbstractAircraft {
         return null;
     }
 
-    /**
-     * 英雄机碰到回复HP道具时增加HP
-     * @param increase
-     */
-    public void increaseHp(int increase){
-        //如果传入的increase不合法，直接返回
-        if (increase < 0) {
-            return;
-        }
-        //防止HP溢出
-        if (hp >= maxHp - increase) {
-            hp = maxHp;
-        } else {
-            hp += increase;
+    @Override
+    public void update(Class<? extends AbstractProp> propClass) {
+        if (BloodProp.class.equals(propClass)) {
+            this.hp += 100;
+            if (this.hp > 10000) {
+                this.hp = 10000;
+            }
+        } else if (BulletProp.class.equals(propClass)) {
+            if (isScattering) {
+                scatteringThread.interrupt();
+            }
+            this.shootStrategy = new ScatteringShootStrategy();
+            this.shootNum = 5;
+            isScattering = true;
+            scatteringThread = new Thread(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(8);
+                    this.shootStrategy = new StraightShootStrategy();
+                    this.shootNum = 2;
+                    isScattering = false;
+                } catch (InterruptedException e) {
+                    System.out.println("子弹道具刷新");
+                }
+            });
+            scatteringThread.start();
         }
     }
 

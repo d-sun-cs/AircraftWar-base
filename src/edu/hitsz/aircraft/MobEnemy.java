@@ -1,8 +1,10 @@
 package edu.hitsz.aircraft;
 
+import edu.hitsz.application.game.Game;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.prop.BombProp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +32,7 @@ public class MobEnemy extends AbstractAircraft {
 
     /**
      * 通过射击产生子弹（实际上并没有产生子弹）
+     *
      * @return 射击出的子弹List
      */
     @Override
@@ -42,4 +45,11 @@ public class MobEnemy extends AbstractAircraft {
         return null;
     }
 
+    @Override
+    public void update(Class<? extends AbstractProp> propClass) {
+        if (BombProp.class.equals(propClass)) {
+            this.vanish();
+            Game.addScore(20);
+        }
+    }
 }

@@ -166,5 +166,11 @@ public abstract class AbstractFlyingObject {
         isValid = false;
     }
 
+    public void increaseSpeedY(int increment) {
+        if (increment > 0) {
+            this.speedY += increment;
+        }
+    }
+
 }
 

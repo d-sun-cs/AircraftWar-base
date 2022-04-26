@@ -23,4 +23,6 @@ public class BloodProp extends AbstractProp {
             new MusicThread("src/videos/get_supply.wav").start();
         }
     }
+
+
 }

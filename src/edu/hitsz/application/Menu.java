@@ -1,9 +1,9 @@
 package edu.hitsz.application;
 
+import edu.hitsz.application.game.Game;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -25,12 +25,6 @@ public class Menu {
     private JPanel topPanel;
     private JPanel bottomPanel;
 
-    private Game game;
-
-    public void setGame(Game game) {
-        this.game = game;
-    }
-
     public static void main(String[] args) {
         JFrame frame = new JFrame("Menu");
         frame.setContentPane(new Menu().mainPanel);
@@ -47,9 +41,9 @@ public class Menu {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            game.setDifficulty(0);
+            Game.setDifficulty(0);
             Status.menuOver = true;
-            game.setUseMusic(music.getSelectedIndex() == 0);
+            Game.setNeedMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }
@@ -57,13 +51,13 @@ public class Menu {
         simple.addActionListener(e -> {
             System.out.println("选择了普通模式");
             try {
-                ImageManager.BACKGROUND_IMAGE = ImageIO.read(new FileInputStream("src/images/bg3.jpg"));
+                ImageManager.BACKGROUND_IMAGE = ImageIO.read(new FileInputStream("src/images/bg2.jpg"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            game.setDifficulty(1);
+            Game.setDifficulty(1);
             Status.menuOver = true;
-            game.setUseMusic(music.getSelectedIndex() == 0);
+            Game.setNeedMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }
@@ -71,13 +65,13 @@ public class Menu {
         difficult.addActionListener(e -> {
             System.out.println("选择了困难模式");
             try {
-                ImageManager.BACKGROUND_IMAGE = ImageIO.read(new FileInputStream("src/images/bg5.jpg"));
+                ImageManager.BACKGROUND_IMAGE = ImageIO.read(new FileInputStream("src/images/bg4.jpg"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            game.setDifficulty(2);
+            Game.setDifficulty(2);
             Status.menuOver = true;
-            game.setUseMusic(music.getSelectedIndex() == 0);
+            Game.setNeedMusic(music.getSelectedIndex() == 0);
             synchronized (Status.class) {
                 Status.class.notifyAll();
             }
