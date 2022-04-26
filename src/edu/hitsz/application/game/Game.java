@@ -209,6 +209,7 @@ public abstract class Game extends JPanel {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+                //停止播放音乐
                 if (needMusic) {
                     if (Objects.nonNull(bgm)) {
                         bgm.setStop(true);
@@ -228,7 +229,6 @@ public abstract class Game extends JPanel {
                     Status.gameOver = true;
                     Status.class.notifyAll();
                 }
-                //showRankingList();
             }
 
         };
