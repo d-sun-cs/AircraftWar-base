@@ -41,17 +41,17 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
     public AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY);
         this.hp = hp;
-        this.maxHp = hp;
+        this.maxHp = hp * 4;
     }
 
-    public void decreaseHp(int decrease){
+    public void decreaseHp(int decrease) {
         //如果传入的decrease不合法，直接返回
         if (decrease < 0) {
             return;
         }
         hp -= decrease;
-        if(hp <= 0){
-            hp=0;
+        if (hp <= 0) {
+            hp = 0;
             vanish();
         }
     }
@@ -62,9 +62,10 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
 
     /**
      * 增加HP
+     *
      * @param increase
      */
-    public void increaseHp(int increase){
+    public void increaseHp(int increase) {
         //如果传入的increase不合法，直接返回
         if (increase < 0) {
             return;
@@ -80,22 +81,22 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
 
     /**
      * 飞机射击方法，可射击对象必须实现
-     * @return
-     *  可射击对象需实现，返回子弹
-     *  非可射击对象空实现，返回空集合(不是特别符合接口隔离原则，待改进)
+     *
+     * @return 可射击对象需实现，返回子弹
+     * 非可射击对象空实现，返回空集合
      */
     public abstract List<BaseBullet> shoot();
 
     /**
      * 掉落道具方法
-     * @return
-     * 敌机掉落道具
-     * 英雄机空实现，返回null(不是特别符合接口隔离原则，待改进)
+     *
+     * @return 敌机掉落道具
+     * 英雄机空实现，返回null
      */
     public abstract AbstractProp produceProp();
 
     /**
-     * 观察者模式中的更新方法（之后实验再实现）
+     * 观察者模式中的更新方法
      */
     public abstract void update(Class<? extends AbstractProp> propClass);
 

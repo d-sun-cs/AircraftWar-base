@@ -62,7 +62,7 @@ public class DifficultGame extends Game {
     @Override
     protected void increaseEnemyProperty(AbstractAircraft enemy) {
         enemy.increaseHp(30);
-        enemy.increaseSpeedY(4);
+        enemy.increaseSpeedY(3);
     }
 
     /**

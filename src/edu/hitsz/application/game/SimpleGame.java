@@ -34,7 +34,7 @@ public class SimpleGame extends Game {
             }
             boss = bossEnemyFactory.createEnemy();
             boss.setShootNum(3);
-            System.out.println("boss产生，普通模式不改变血量");
+            System.out.println("boss产生，普通模式boss不增强");
             step += step;
         }
         //分数到达2400后，切换背景

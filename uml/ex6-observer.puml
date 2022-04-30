@@ -1,0 +1,35 @@
+@startuml
+class AbstractAircraft {
+    {abstract} update(Class<? extends AbstractProp): void
+}
+abstract class AbstractProp {
+    # List<AbstractAircraft> observers
+    + subscribe(AbstractAircraft): void
+    + unsubscribe(AbstractAircraft): void
+    + notifyObservers(): void
+}
+class BombProp {
+    # List<AbstractAircraft> observers
+    + subscribe(AbstractAircraft): void
+    + unsubscribe(AbstractAircraft): void
+    + notifyObservers(): void
+}
+class MobEnemy {
+    update(Class<? extends AbstractProp): void
+}
+
+class EliteEnemy {
+    update(Class<? extends AbstractProp): void
+}
+class Game {
+    - List<AbstractAircraft> enemyAircrafts
+    - List<AbstractProp> props
+}
+
+AbstractAircraft <|-- MobEnemy
+AbstractProp <|-- BombProp
+MobEnemy <|-- EliteEnemy
+AbstractAircraft <--o AbstractProp
+Game o--> AbstractAircraft
+Game o--> AbstractProp
+@enduml

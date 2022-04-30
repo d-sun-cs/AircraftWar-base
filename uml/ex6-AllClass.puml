@@ -1,0 +1,33 @@
+@startuml
+
+abstract class AbstractFlyingObject
+
+abstract class AbstractAircraft
+class BaseBullet
+abstract class AbstractProp
+
+class HeroAircraft
+class MobEnemy
+class EliteEnemy
+class BossEnemy
+
+class HeroBullet
+class EnemyBullet
+
+AbstractFlyingObject <|-- AbstractAircraft
+AbstractFlyingObject <|-- BaseBullet
+AbstractFlyingObject <|-- AbstractProp
+
+AbstractAircraft <|-- HeroAircraft
+AbstractAircraft <|-- MobEnemy
+AbstractAircraft <|-- BossEnemy
+MobEnemy <|-- EliteEnemy
+
+BaseBullet <|-- HeroBullet
+BaseBullet <|-- EnemyBullet
+
+AbstractProp <|-- BloodProp
+AbstractProp <|-- BombProp
+AbstractProp <|-- BulletProp
+
+@enduml

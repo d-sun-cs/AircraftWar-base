@@ -1,0 +1,29 @@
+@startuml
+abstract class Game {
+    + action(): void
+    # {abstract}increaseDifficulty(): void
+    # {abstract} scoreCheck(): void
+    # canEnemyShoot(): boolean
+    # canHeroShoot(): boolean
+    # increaseEnemyProperty(AbstractAircraft enemy): void
+}
+class EasyGame {
+    # increaseDifficulty(): void
+    # scoreCheck(): void
+    # canEnemyShoot(): boolean
+}
+class SimpleGame {
+    # increaseDifficulty(): void
+    # scoreCheck(): void
+    # increaseEnemyProperty(AbstractAircraft enemy): void
+}
+class DifficultGame {
+    # increaseDifficulty(): void
+    # scoreCheck(): void
+    # canHeroShoot(): boolean
+    # increaseEnemyProperty(AbstractAircraft enemy): void
+}
+Game <|-- EasyGame
+Game <|-- SimpleGame
+Game <|-- DifficultGame
+@enduml

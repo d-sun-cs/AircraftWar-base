@@ -88,7 +88,7 @@ public class HeroAircraft extends AbstractAircraft {
     }
 
     /**
-     * 不掉落道具，空实现(目前不太符合接口隔离原则，待改进)
+     * 不掉落道具，空实现
      * @return null
      */
     @Override
